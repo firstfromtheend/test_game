@@ -22,24 +22,27 @@ public class Draggable : MonoBehaviour
 
     private Vector3 GetMousePositioonIntheWorld()
     {
+        //захватываем позицию курсора и переводим в мировые координаты
         var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         return mousePos;
     }
 
     private void OnMouseDown()
     {
+        //определяем оффсет положения курсора что бы не было смещения при перетаскивании предмета
         _mouseOffset = gameObject.transform.position - GetMousePositioonIntheWorld();
         _rigidbody2.constraints = RigidbodyConstraints2D.FreezeRotation;
-        CheckRayCastHit();
     }
 
     private void OnMouseDrag()
     {
+        //передвигаем предмет за курсором
         transform.position = GetMousePositioonIntheWorld() + _mouseOffset;
     }
 
     private void OnMouseUp()
     {
+        //проверяем находится ли предмет над полкой и  есть ли место на ней
         if (_isInItemPlace && _canPlace)
         {
             Debug.Log("hit!");
@@ -54,6 +57,7 @@ public class Draggable : MonoBehaviour
 
     public void SetItemToPlace(Vector2 xData, Vector2 yData)
     {
+        //ставим предмет на место
         var newXPos = Mathf.Clamp(transform.position.x, xData.x, xData.y);
         var newYPos = Mathf.Clamp(transform.position.y, yData.x + _selfSize.y, yData.y);
 
@@ -63,6 +67,7 @@ public class Draggable : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        //проверяем есть можно ли поставить предмет на полку при его падении на неё, то есть не при непосредственном перетаскивании
         _canPlace = collision.gameObject.GetComponent<ItemPlace>().CanTake;
         if (collision.gameObject.layer == 7 && _canPlace)
         {
@@ -83,13 +88,8 @@ public class Draggable : MonoBehaviour
 
     private void GetItemPlaceBorders(GameObject itemPlace)
     {
+        //получаем данные о границах полки с которым столкнулся предмет
         _xBorders = itemPlace.GetComponent<ItemPlace>().GetXBorders();
         _yBorders = itemPlace.GetComponent<ItemPlace>().GetYBorders();
-    }
-
-    private void CheckRayCastHit()
-    {
-        RaycastHit2D[] raycastHit = Physics2D.GetRayIntersectionAll(Camera.main.ScreenPointToRay(Input.mousePosition));
-        Debug.Log(raycastHit);
     }
 }
